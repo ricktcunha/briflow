@@ -369,7 +369,8 @@ function showStep(step) {
     const currentStepElement = document.querySelector(`[data-step="${step}"]`);
     if (currentStepElement) {
         currentStepElement.classList.add('active');
-        currentStepElement.classList.add('step-transition');
+        // Remover a linha abaixo para não aplicar step-transition
+        // currentStepElement.classList.add('step-transition');
         
         // Animar entrada da etapa
         setTimeout(() => {
@@ -377,12 +378,16 @@ function showStep(step) {
             currentStepElement.style.transform = 'translateY(0)';
         }, 100);
         
-        // Remover classe de transição após animação
-        setTimeout(() => {
-            currentStepElement.classList.remove('step-transition');
-        }, 600);
+        // Remover classe de transição após animação (não é mais necessário)
+        // setTimeout(() => {
+        //     currentStepElement.classList.remove('step-transition');
+        // }, 600);
     }
-    
+    // Rolar suavemente para o início do formulário
+    const formularioSection = document.getElementById('formulario');
+    if (formularioSection) {
+        formularioSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     // Atualizar botões de navegação
     updateNavigationButtons();
     
