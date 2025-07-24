@@ -338,6 +338,11 @@ function nextStep() {
             showStep(currentStep);
             updateProgress();
             scrollToTop();
+            // Se avançou da primeira para a segunda etapa, ocultar o hero
+            if (currentStep === 2) {
+                const hero = document.querySelector('section.relative.z-20.py-20');
+                if (hero) hero.style.display = 'none';
+            }
         }
     }
 }
@@ -405,8 +410,11 @@ function updateNavigationButtons() {
 
 // Atualizar barra de progresso
 function updateProgress() {
-    // Calcular progresso baseado na etapa atual
-    const progress = (currentStep / totalSteps) * 100;
+    // Calcular progresso baseado na etapa atual (0% na etapa 1, 100% na última)
+    let progress = 0;
+    if (totalSteps > 1) {
+        progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+    }
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
     
@@ -608,24 +616,61 @@ function saveFormData() {
 
 // Limpar formulário
 function clearForm() {
-    if (confirm('Tem certeza que deseja limpar todo o formulário?')) {
-        document.getElementById('briefing-form').reset();
-        currentStep = 1;
-        showStep(1);
-        updateProgress();
-        formData = {};
-        
-        // Limpar erros
-        document.querySelectorAll('.error').forEach(field => {
-            removeError(field);
-        });
-        
-        // Ocultar campo "outros"
-        document.getElementById('outros-campo').classList.add('hidden');
-        
-        // Feedback visual
-        showNotification('Formulário limpo com sucesso!', 'success');
-    }
+    showCustomConfirm(
+        'Tem certeza que deseja limpar todo o formulário?',
+        () => {
+            document.getElementById('briefing-form').reset();
+            currentStep = 1;
+            showStep(1);
+            updateProgress();
+            formData = {};
+            // Limpar erros
+            document.querySelectorAll('.error').forEach(field => {
+                removeError(field);
+            });
+            // Ocultar campo "outros"
+            document.getElementById('outros-campo').classList.add('hidden');
+            // Feedback visual
+            showNotification('Formulário limpo com sucesso!', 'success');
+        }
+    );
+}
+
+// Modal customizado de confirmação
+function showCustomConfirm(message, onConfirm) {
+    // Remover modal existente
+    const existing = document.getElementById('custom-confirm-modal');
+    if (existing) existing.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'custom-confirm-modal';
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm';
+    modal.innerHTML = `
+        <div class="bg-white/10 backdrop-blur-xl border border-accent-500/20 rounded-2xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center">
+            <h3 class="text-lg font-bold text-accent-400 mb-4">Confirmação</h3>
+            <p class="text-white text-center mb-6">${message}</p>
+            <div class="flex gap-4">
+                <button id="custom-confirm-ok" class="px-6 py-2 rounded-lg bg-accent-500 text-white font-semibold hover:bg-accent-600 transition">OK</button>
+                <button id="custom-confirm-cancel" class="px-6 py-2 rounded-lg bg-gray-700 text-gray-200 font-semibold hover:bg-gray-600 transition">Cancelar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('custom-confirm-ok').onclick = () => {
+        modal.remove();
+        if (typeof onConfirm === 'function') onConfirm();
+    };
+    document.getElementById('custom-confirm-cancel').onclick = () => {
+        modal.remove();
+    };
+    // Fechar com ESC
+    document.addEventListener('keydown', function escListener(e) {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escListener);
+        }
+    });
 }
 
 // Submissão do formulário
@@ -647,6 +692,27 @@ function submitForm() {
     
     // Gerar e enviar email
     generateEmail();
+    
+    // Após envio, mostrar hero, resetar e ocultar formulário
+    setTimeout(() => {
+        const hero = document.querySelector('section.relative.z-20.py-20');
+        const formSection = document.getElementById('formulario');
+        if (hero) hero.style.display = '';
+        if (formSection) formSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        // Resetar o formulário para o estado inicial
+        if (typeof clearForm === 'function') {
+            clearForm();
+        } else {
+            // fallback manual
+            const form = document.getElementById('briefing-form');
+            if (form) form.reset();
+            currentStep = 1;
+            showStep(1);
+            updateProgress();
+            formData = {};
+        }
+    }, 1200); // espera a mensagem de sucesso aparecer
     
     return false; // Prevenir envio padrão
 }
@@ -703,7 +769,7 @@ Prazo de resposta: até 2 dias úteis`;
         const encodedBody = encodeURIComponent(bodyText);
         
         // Construir link mailto
-        const mailtoLink = `mailto:marketing@adubosreal.com,design@adubosreal.com?subject=${encodedSubject}&body=${encodedBody}`;
+        const mailtoLink = `mailto:henrique.cunha@adubosreal.com.br,juliana.leopoldino@adubosreal.com.br,bruno.friano@adubosreal.com.br?subject=${encodedSubject}&body=${encodedBody}`;
         
         console.log('Link mailto gerado:', mailtoLink);
         
@@ -754,7 +820,7 @@ function showEmailDataModal(subject, body) {
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Para:</label>
-                    <input type="text" value="marketing@adubosreal.com, design@adubosreal.com" readonly 
+                    <input type="text" value="henrique.cunha@adubosreal.com.br, juliana.leopoldino@adubosreal.com.br, bruno.friano@adubosreal.com.br" readonly 
                            class="w-full px-3 py-2 bg-white/10 border border-gray-600 rounded-lg text-white text-sm">
                 </div>
                 <div>
