@@ -614,26 +614,30 @@ function saveFormData() {
     formData.materiais = materiais;
 }
 
-// Limpar formulário
+// Limpar formulário (manual, com confirmação)
 function clearForm() {
     showCustomConfirm(
         'Tem certeza que deseja limpar todo o formulário?',
         () => {
-            document.getElementById('briefing-form').reset();
-            currentStep = 1;
-            showStep(1);
-            updateProgress();
-            formData = {};
-            // Limpar erros
-            document.querySelectorAll('.error').forEach(field => {
-                removeError(field);
-            });
-            // Ocultar campo "outros"
-            document.getElementById('outros-campo').classList.add('hidden');
-            // Feedback visual
+            resetFormSilently();
             showNotification('Formulário limpo com sucesso!', 'success');
         }
     );
+}
+
+// Resetar formulário sem confirmação/modal
+function resetFormSilently() {
+    document.getElementById('briefing-form').reset();
+    currentStep = 1;
+    showStep(1);
+    updateProgress();
+    formData = {};
+    // Limpar erros
+    document.querySelectorAll('.error').forEach(field => {
+        removeError(field);
+    });
+    // Ocultar campo "outros"
+    document.getElementById('outros-campo').classList.add('hidden');
 }
 
 // Modal customizado de confirmação
@@ -700,18 +704,8 @@ function submitForm() {
         if (hero) hero.style.display = '';
         if (formSection) formSection.scrollIntoView({behavior: 'smooth', block: 'start'});
         window.scrollTo({top: 0, behavior: 'smooth'});
-        // Resetar o formulário para o estado inicial
-        if (typeof clearForm === 'function') {
-            clearForm();
-        } else {
-            // fallback manual
-            const form = document.getElementById('briefing-form');
-            if (form) form.reset();
-            currentStep = 1;
-            showStep(1);
-            updateProgress();
-            formData = {};
-        }
+        // Resetar o formulário para o estado inicial (sem confirmação)
+        resetFormSilently();
     }, 1200); // espera a mensagem de sucesso aparecer
     
     return false; // Prevenir envio padrão
