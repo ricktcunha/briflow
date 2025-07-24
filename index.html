@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Briefing de Marketing - Adubos Real</title>
+    <meta name="description" content="Sistema de briefing de marketing da Adubos Real para otimizar a comunicação entre departamentos">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            900: '#0a0a0a',
+                            800: '#111111',
+                        },
+                        accent: {
+                            500: '#22c55e',
+                            600: '#10b981',
+                            400: '#00ff88',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'float': 'float 6s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen text-white overflow-x-hidden relative">
+    
+    <!-- Vídeo de background -->
+    <div class="fixed inset-0 z-0">
+        <!-- Loading indicator -->
+        <div id="video-loading" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary-900 via-black to-primary-800 z-10">
+            <div class="text-center">
+                <div class="w-16 h-16 border-4 border-accent-500/30 border-t-accent-500 rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-accent-400 text-sm">Carregando vídeo de fundo...</p>
+            </div>
+        </div>
+        
+        <video 
+            id="background-video" 
+            class="w-full h-full object-cover"
+            autoplay 
+            muted 
+            loop 
+            playsinline
+            preload="auto"
+            poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect width='1920' height='1080' fill='%230a0a0a'/%3E%3C/svg%3E"
+        >
+            <source src="fundo-bg.mp4" type="video/mp4">
+            <!-- Fallback para navegadores que não suportam vídeo -->
+            <div class="w-full h-full bg-gradient-to-br from-primary-900 via-black to-primary-800"></div>
+        </video>
+        
+        <!-- Overlay escuro para melhorar legibilidade -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    </div>
+    
+    <!-- Partículas animadas no background -->
+    <div id="particles" class="fixed inset-0 pointer-events-none z-10"></div>
+    
+    <!-- Header -->
+    <header class="relative z-20 py-6 px-4 sm:px-6 lg:px-8">
+        <nav class="max-w-7xl mx-auto flex items-center justify-center">
+            <div class="flex items-center space-x-4 group cursor-pointer">
+                <div class="relative">
+                    <img 
+                        src="logo-ar.svg" 
+                        alt="Adubos Real" 
+                        class="h-12 w-auto transition-all duration-500 ease-in-out"
+                        title="Adubos Real"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
+                    <!-- Fallback se o logo não carregar -->
+                    <div class="w-12 h-12 bg-gradient-to-r from-accent-500 to-accent-400 rounded-lg flex items-center justify-center hidden">
+                        <i data-lucide="leaf" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <!-- Efeito de glow no hover -->
+                    <div class="absolute inset-0 bg-accent-400/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative z-20 py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
+                Sistema de 
+                <span class="bg-gradient-to-r from-accent-400 via-accent-500 to-accent-600 bg-clip-text text-transparent">
+                    Briefing de Marketing
+                </span>
+            </h2>
+            <p class="text-xl text-gray-300 mb-8 animate-slide-up">
+                Otimize a comunicação entre departamentos e nossa equipe de marketing. 
+                Crie briefings completos e profissionais em minutos.
+            </p>
+            <button 
+                onclick="scrollToForm()" 
+                class="group relative px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-accent-500/25 animate-slide-up"
+            >
+                <span class="relative z-10">Começar Briefing</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-accent-400 to-accent-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+        </div>
+    </section>
+
+
+
+    <!-- Formulário -->
+    <section id="formulario" class="relative z-20 py-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-300">Progresso do formulário</span>
+                    <span id="progress-text" class="text-sm font-medium text-accent-400">0%</span>
+                </div>
+                <div class="w-full bg-gray-800 rounded-full h-2">
+                    <div id="progress-bar" class="bg-gradient-to-r from-accent-500 to-accent-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <form id="briefing-form" class="space-y-8">
+                <!-- ETAPA 1: IDENTIFICAÇÃO -->
+                <div class="form-step active" data-step="1">
+                    <div class="backdrop-blur-xl bg-white/5 border border-accent-500/20 rounded-2xl p-8">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-accent-500/20 rounded-xl flex items-center justify-center">
+                                <i data-lucide="user" class="w-5 h-5 text-accent-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-accent-400">Identificação</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="nome" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Nome completo <span class="text-red-400">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="nome" 
+                                    name="nome" 
+                                    required
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                    placeholder="Digite seu nome completo"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label for="departamento" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Departamento/Área <span class="text-red-400">*</span>
+                                </label>
+                                <select 
+                                    id="departamento" 
+                                    name="departamento" 
+                                    required
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                >
+                                    <option value="">Selecione o departamento</option>
+                                    <option value="vendas">Vendas</option>
+                                    <option value="comercial">Comercial</option>
+                                    <option value="administrativo">Administrativo</option>
+                                    <option value="financeiro">Financeiro</option>
+                                    <option value="rh">Recursos Humanos</option>
+                                    <option value="operacional">Operacional</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Email <span class="text-red-400">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    required
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                    placeholder="seu.email@adubosreal.com"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label for="telefone" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Telefone <span class="text-red-400">*</span>
+                                </label>
+                                <input 
+                                    type="tel" 
+                                    id="telefone" 
+                                    name="telefone" 
+                                    required
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                    placeholder="(35) 99999-9999"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-300 mb-3">
+                                Nível de prioridade <span class="text-red-400">*</span>
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="priority-option">
+                                    <input type="radio" name="prioridade" value="baixa" class="sr-only">
+                                    <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                        <div class="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i data-lucide="clock" class="w-4 h-4 text-green-400"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Baixa</span>
+                                    </div>
+                                </label>
+                                
+                                <label class="priority-option">
+                                    <input type="radio" name="prioridade" value="media" class="sr-only">
+                                    <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                        <div class="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i data-lucide="alert-circle" class="w-4 h-4 text-yellow-400"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Média</span>
+                                    </div>
+                                </label>
+                                
+                                <label class="priority-option">
+                                    <input type="radio" name="prioridade" value="alta" class="sr-only">
+                                    <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                        <div class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i data-lucide="zap" class="w-4 h-4 text-red-400"></i>
+                                        </div>
+                                        <span class="text-sm font-medium">Alta</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETAPA 2: PROJETO -->
+                <div class="form-step" data-step="2">
+                    <div class="backdrop-blur-xl bg-white/5 border border-accent-500/20 rounded-2xl p-8">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-accent-500/20 rounded-xl flex items-center justify-center">
+                                <i data-lucide="target" class="w-5 h-5 text-accent-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-accent-400">Projeto</h3>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label for="projeto" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Nome do projeto/campanha <span class="text-red-400">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="projeto" 
+                                    name="projeto" 
+                                    required
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                    placeholder="Ex: Campanha de Lançamento Produto X"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label for="objetivo" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Objetivo principal <span class="text-red-400">*</span>
+                                </label>
+                                <textarea 
+                                    id="objetivo" 
+                                    name="objetivo" 
+                                    required
+                                    rows="4"
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300 resize-none"
+                                    placeholder="Descreva o objetivo principal da campanha (ex: aumentar vendas, divulgar novo produto, fidelizar clientes...)"
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="publico" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Público-alvo
+                                </label>
+                                <textarea 
+                                    id="publico" 
+                                    name="publico" 
+                                    rows="3"
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300 resize-none"
+                                    placeholder="Descreva o público-alvo (ex: produtores rurais, distribuidores, faixa etária, região...)"
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="mensagem" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Mensagem-chave
+                                </label>
+                                <textarea 
+                                    id="mensagem" 
+                                    name="mensagem" 
+                                    rows="3"
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300 resize-none"
+                                    placeholder="Qual é a mensagem principal que deve ser transmitida?"
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="tom" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Tom de comunicação
+                                </label>
+                                <select 
+                                    id="tom" 
+                                    name="tom" 
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                >
+                                    <option value="">Selecione o tom</option>
+                                    <option value="formal">Formal e profissional</option>
+                                    <option value="amigavel">Amigável e acessível</option>
+                                    <option value="tecnico">Técnico e especializado</option>
+                                    <option value="inspiracional">Inspiracional e motivacional</option>
+                                    <option value="urgente">Urgente e persuasivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETAPA 3: ESPECIFICAÇÕES -->
+                <div class="form-step" data-step="3">
+                    <div class="backdrop-blur-xl bg-white/5 border border-accent-500/20 rounded-2xl p-8">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-accent-500/20 rounded-xl flex items-center justify-center">
+                                <i data-lucide="settings" class="w-5 h-5 text-accent-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-accent-400">Especificações</h3>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-3">
+                                    Tipo de material <span class="text-red-400">*</span>
+                                </label>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="card" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Card</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="banner" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="image" class="w-4 h-4 text-purple-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Banner</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="flyer" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="file-text" class="w-4 h-4 text-green-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Flyer</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="video" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="video" class="w-4 h-4 text-red-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Vídeo</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="apresentacao" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="presentation" class="w-4 h-4 text-yellow-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Apresentação</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="convite" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="mail" class="w-4 h-4 text-pink-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Convite PGD</span>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="material-option">
+                                        <input type="checkbox" name="materiais" value="outros" class="sr-only">
+                                        <div class="p-4 border border-gray-600 rounded-xl text-center cursor-pointer transition-all duration-300 hover:border-accent-500 hover:bg-accent-500/10">
+                                            <div class="w-8 h-8 bg-gray-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i data-lucide="plus" class="w-4 h-4 text-gray-400"></i>
+                                            </div>
+                                            <span class="text-sm font-medium">Outros</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <!-- Campo "Outros" condicional -->
+                                <div id="outros-campo" class="mt-4 hidden">
+                                    <input 
+                                        type="text" 
+                                        id="outros-especifico" 
+                                        name="outros-especifico"
+                                        class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                        placeholder="Especifique o tipo de material desejado"
+                                    >
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="dimensoes" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Dimensões/tamanhos
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="dimensoes" 
+                                        name="dimensoes"
+                                        class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                        placeholder="Ex: 1080x1080px, A4, 16:9..."
+                                    >
+                                </div>
+                                
+                                <div>
+                                    <label for="prazo" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Prazo de entrega <span class="text-red-400">*</span>
+                                    </label>
+                                    <input 
+                                        type="date" 
+                                        id="prazo" 
+                                        name="prazo" 
+                                        required
+                                        class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETAPA 4: CONTEÚDO & RECURSOS -->
+                <div class="form-step" data-step="4">
+                    <div class="backdrop-blur-xl bg-white/5 border border-accent-500/20 rounded-2xl p-8">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-accent-500/20 rounded-xl flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-5 h-5 text-accent-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-accent-400">Conteúdo & Recursos</h3>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label for="textos" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Textos/copy necessários
+                                </label>
+                                <textarea 
+                                    id="textos" 
+                                    name="textos" 
+                                    rows="6"
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300 resize-none"
+                                    placeholder="Forneça os textos que devem ser incluídos no material (títulos, subtítulos, descrições, call-to-action...)"
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="referencias" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Referências visuais
+                                </label>
+                                <textarea 
+                                    id="referencias" 
+                                    name="referencias" 
+                                    rows="4"
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300 resize-none"
+                                    placeholder="Descreva referências visuais, cores, estilos, exemplos de materiais similares..."
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="observacoes" class="block text-sm font-medium text-gray-300 mb-2">
+                                    Observações adicionais
+                                </label>
+                                <textarea 
+                                    id="observacoes" 
+                                    name="observacoes" 
+                                    rows="4"
+                                    class="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all duration-300 resize-none"
+                                    placeholder="Qualquer informação adicional que considere importante..."
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navegação do Formulário -->
+                <div class="flex justify-center items-center pt-8">
+                    <div class="flex space-x-4">
+                        <button 
+                            type="button" 
+                            id="prev-btn" 
+                            onclick="previousStep()"
+                            class="px-6 py-3 border border-gray-600 rounded-xl text-gray-300 hover:border-accent-500 hover:text-accent-400 transition-all duration-300 hidden"
+                        >
+                            <i data-lucide="arrow-left" class="w-4 h-4 inline mr-2"></i>
+                            Anterior
+                        </button>
+                        
+                        <button 
+                            type="button" 
+                            onclick="clearForm()"
+                            class="px-6 py-3 border border-gray-600 rounded-xl text-gray-300 hover:border-red-500 hover:text-red-400 transition-all duration-300"
+                        >
+                            <i data-lucide="trash-2" class="w-4 h-4 inline mr-2"></i>
+                            Limpar
+                        </button>
+                        
+                        <button 
+                            type="button" 
+                            id="next-btn" 
+                            onclick="nextStep()"
+                            class="px-6 py-3 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl text-white hover:scale-105 transition-all duration-300"
+                        >
+                            Próximo
+                            <i data-lucide="arrow-right" class="w-4 h-4 inline ml-2"></i>
+                        </button>
+                        
+                        <button 
+                            type="submit" 
+                            id="submit-btn" 
+                            class="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl text-white hover:scale-105 transition-all duration-300 hidden"
+                        >
+                            <i data-lucide="send" class="w-4 h-4 inline mr-2"></i>
+                            Enviar Briefing
+                        </button>
+                        
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+
+    <!-- Footer -->
+    <footer class="relative z-20 py-16 px-4 sm:px-6 lg:px-8 mt-20">
+        <div class="max-w-6xl mx-auto">
+            <div class="backdrop-blur-xl bg-white/5 border border-accent-500/20 rounded-2xl p-8">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-accent-400 mb-2">Precisa de ajuda ou tem dúvidas?</h3>
+                    <p class="text-gray-300">Nossa equipe está sempre disponível para auxiliar</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="mail" class="w-6 h-6 text-accent-400"></i>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1">Email</h4>
+                        <a href="mailto:marketing@adubosreal.com" class="text-gray-300 hover:text-accent-400 transition-colors">
+                            marketing@adubosreal.com
+                        </a>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="phone" class="w-6 h-6 text-accent-400"></i>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1">Telefone/WhatsApp</h4>
+                        <a href="https://wa.me/5535999999999" class="text-gray-300 hover:text-accent-400 transition-colors">
+                            (35) 99999-9999
+                        </a>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="clock" class="w-6 h-6 text-accent-400"></i>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1">Horário</h4>
+                        <p class="text-gray-300">Segunda a Sexta<br>8h às 18h</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="message-circle" class="w-6 h-6 text-accent-400"></i>
+                        </div>
+                        <h4 class="font-semibold text-white mb-1">Suporte</h4>
+                        <div class="space-y-2">
+                            <a href="https://wa.me/5535999999999" class="block text-gray-300 hover:text-accent-400 transition-colors text-sm">
+                                Enviar WhatsApp
+                            </a>
+                            <a href="mailto:marketing@adubosreal.com" class="block text-gray-300 hover:text-accent-400 transition-colors text-sm">
+                                Enviar Email
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-700 pt-8 text-center">
+                    <p class="text-gray-400 text-sm">
+                        © 2025 Adubos Real. Todos os direitos reservados.
+                    </p>
+                    <p class="text-gray-500 text-xs mt-1">
+                        Sistema desenvolvido para otimizar processos internos
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botão Flutuante de Ajuda -->
+    <button 
+        id="help-button"
+        onclick="showHelpModal()"
+        class="fixed right-6 bottom-6 z-30 w-14 h-14 bg-gradient-to-r from-accent-500 to-accent-600 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+        title="Como funciona este formulário"
+        aria-label="Abrir ajuda sobre como usar o formulário"
+    >
+        <i data-lucide="help-circle" class="w-7 h-7 text-white group-hover:rotate-12 transition-transform duration-300"></i>
+        
+        <!-- Indicador de pulso -->
+        <div class="absolute inset-0 rounded-full bg-accent-400 animate-ping opacity-20"></div>
+    </button>
+
+    <!-- Modal de Ajuda -->
+    <div id="help-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white/10 backdrop-blur-xl border border-accent-500/20 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center">
+                        <i data-lucide="info" class="w-6 h-6 text-accent-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-accent-400">Como funciona este formulário</h3>
+                        <p class="text-gray-300 text-sm">Guia completo de uso</p>
+                    </div>
+                </div>
+                <button 
+                    onclick="hideHelpModal()"
+                    class="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                    aria-label="Fechar ajuda"
+                >
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-3">🎯 Sobre o Sistema</h4>
+                    <p class="text-gray-300 leading-relaxed">
+                        Este sistema foi desenvolvido para otimizar a comunicação entre departamentos e a equipe de marketing da Adubos Real. 
+                        Ao preencher este briefing, você estará fornecendo todas as informações necessárias para que nossa equipe possa criar 
+                        materiais de marketing alinhados com seus objetivos.
+                    </p>
+                </div>
+                
+                <div class="bg-primary-800/50 rounded-xl p-6">
+                    <h4 class="font-semibold text-accent-400 mb-4 flex items-center">
+                        <i data-lucide="list-ordered" class="w-5 h-5 mr-2"></i>
+                        Processo de Preenchimento
+                    </h4>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start space-x-3">
+                            <span class="w-6 h-6 bg-accent-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-accent-400 text-sm font-bold">1</span>
+                            </span>
+                            <span>Preencha todos os campos obrigatórios (marcados com <span class="text-red-400">*</span>)</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="w-6 h-6 bg-accent-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-accent-400 text-sm font-bold">2</span>
+                            </span>
+                            <span>Seja o mais específico possível nas descrições para melhor resultado</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="w-6 h-6 bg-accent-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-accent-400 text-sm font-bold">3</span>
+                            </span>
+                            <span>Ao finalizar, um email será gerado automaticamente</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="w-6 h-6 bg-accent-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-accent-400 text-sm font-bold">4</span>
+                            </span>
+                            <span>Nossa equipe de marketing receberá seu briefing e entrará em contato</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="w-6 h-6 bg-accent-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-accent-400 text-sm font-bold">5</span>
+                            </span>
+                            <span>Prazo de resposta: até 2 dias úteis</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                        <h5 class="font-semibold text-blue-400 mb-2 flex items-center">
+                            <i data-lucide="lightbulb" class="w-4 h-4 mr-2"></i>
+                            Dica
+                        </h5>
+                        <p class="text-gray-300 text-sm">
+                            Use o botão "Limpar" se precisar recomeçar o formulário do zero.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+                        <h5 class="font-semibold text-yellow-400 mb-2 flex items-center">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>
+                            Importante
+                        </h5>
+                        <p class="text-gray-300 text-sm">
+                            Este formulário gera um email automático. Certifique-se de que seu cliente de email esteja configurado.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+                    <h5 class="font-semibold text-green-400 mb-2 flex items-center">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                        Pronto para começar?
+                    </h5>
+                    <p class="text-gray-300 text-sm">
+                        Agora você já sabe como funciona! Clique em "Fechar" e comece a preencher seu briefing de marketing.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-end">
+                <button 
+                    onclick="hideHelpModal()"
+                    class="px-6 py-3 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl text-white hover:scale-105 transition-all duration-300 flex items-center"
+                >
+                    <i data-lucide="check" class="w-4 h-4 mr-2"></i>
+                    Entendi, vamos começar!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html> 
